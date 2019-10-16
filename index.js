@@ -1,6 +1,7 @@
-var app = require("express")();
-var http = require("http").createServer(app);
-var io = require("socket.io")(http);
+let app = require("express")();
+let http = require("http").createServer(app);
+let io = require("socket.io")(http);
+let moment = require("moment");
 
 app.get("/", function(req, res) {
   res.sendFile(__dirname + "/index.html");
@@ -9,25 +10,30 @@ app.get("/", function(req, res) {
 let loggedInUsers = [];
 
 io.on("connection", function(socket) {
+  // moment().format();
   let added = false;
-  let currentUser = { username: "", img_url: "" };
+  let currentUser = { username: "", img_url: "", timestamp: null };
   let typing = false;
   console.log("Connected");
 
   socket.on("chat message", function(msg) {
-    io.sockets.emit("sent message", { msg, currentUser });
+    let timestamp = moment().format("h:mm:ss");
+    io.sockets.emit("sent message", { msg, currentUser, timestamp });
     typing = false;
   });
 
   socket.on("login", ({ username, img_url }) => {
-    added = true;
-    console.log(username);
-    currentUser.username = username;
-    currentUser.img_url = img_url;
-    loggedInUsers.push(currentUser);
+    if (!added) {
+      added = true;
+      console.log(username);
+      currentUser.username = username;
+      currentUser.img_url = img_url;
+      currentUser.timestamp = moment().format("h:mm:ss");
+      loggedInUsers.push(currentUser);
 
-    io.sockets.emit("userLoggedIn", currentUser);
-    console.log(currentUser + " logged in");
+      io.sockets.emit("userLoggedIn", currentUser);
+      console.log(currentUser + " logged in");
+    }
   });
 
   socket.on("changeProfile", ({ username, img_url }) => {
@@ -36,6 +42,7 @@ io.on("connection", function(socket) {
     });
     if (username) currentUser.username = username;
     if (img_url) currentUser.img_url = img_url;
+    currentUser.timestamp = moment().format("h:mm:ss");
 
     loggedInUsers.push(currentUser);
   });
@@ -59,6 +66,7 @@ io.on("connection", function(socket) {
   socket.on("disconnect", reason => {
     console.log("disconnected");
     if (added) {
+      currentUser.timestamp = moment().format("h:mm:ss");
       io.sockets.emit("disconnected", currentUser);
       loggedInUsers = loggedInUsers.filter(user => {
         console.log(user);
@@ -73,7 +81,7 @@ io.on("connection", function(socket) {
   });
 });
 
-http.listen(3003, function() {
+http.listen(3005, function() {
   console.log("listening on *:3000");
 });
 

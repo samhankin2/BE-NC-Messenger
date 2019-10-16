@@ -75,7 +75,9 @@
             img_url:
               "https://cloudfour.com/examples/img-currentsrc/images/kitten-small.png"
           });
-          $("#user").text($("#login").val());
+          if (!$("#user").text()) {
+            $("#user").text($("#login").val());
+          }
           $("#login").val("");
         }
       });
