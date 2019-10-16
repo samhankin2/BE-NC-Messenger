@@ -11,9 +11,11 @@ let loggedInUsers = [];
 io.on("connection", function(socket) {
   let added = false;
   let currentUser = "";
+  let typing = false;
   console.log("Connected");
   socket.on("chat message", function(msg) {
-    io.sockets.emit("sent message", msg);
+    io.sockets.emit("sent message", { msg, currentUser });
+    typing = false;
   });
 
   socket.on("login", user => {
@@ -30,6 +32,16 @@ io.on("connection", function(socket) {
     console.log(loggedInUsers);
   });
 
+  socket.on("typing", () => {
+    console.log("on typing server");
+
+    if (!typing) {
+      if (added) {
+        io.sockets.emit("typing", currentUser);
+        typing = true;
+      }
+    }
+  });
   socket.on("disconnect", reason => {
     console.log("disconnected");
     if (added) {
@@ -47,11 +59,7 @@ http.listen(3000, function() {
   console.log("listening on *:3000");
 });
 
-// socket.on("typing", data => {
-//   console.log(data);
-// });
-
 // To Do
-//doesnt show logged out if not logged in
-//display someone logging in
+
 //make sure filter works properly and logged out properly
+//changiing names should remove old name

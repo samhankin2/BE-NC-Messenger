@@ -54,9 +54,9 @@
         socket.emit("test");
       });
       $("#m").keyup(function(e) {
-        // if (!e.val()) {
-
-        socket.emit("typing", $("#m").val());
+        // if (!e.target.value) {
+        console.log("keyip");
+        if (e.keyCode != 13) socket.emit("typing");
         // }
         return false;
       });
@@ -74,14 +74,18 @@
           $("#login").val("");
         }
       });
-      socket.on("sent message", data => {
-        $("#messages").append(`<li>${data}</li>`);
+      socket.on("sent message", ({ currentUser, msg }) => {
+        $("#typing" + currentUser).remove();
+        $("#messages").append(`<li>${msg}</li>`);
       });
       socket.on("disconnected", msg => {
         $("#messages").append(`<li>${msg} has disconnected</li>`);
       });
       socket.on("userLoggedIn", user => {
         $("#messages").append(`<li>${user} has connected</li>`);
+      });
+      socket.on("typing", user => {
+        $("#messages").append(`<li id="typing${user}">${user} is typing</li>`);
       });
     });
   </script>
