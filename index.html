@@ -11,20 +11,20 @@
       body {
         font: 13px Helvetica, Arial;
       }
-      form {
+      .form {
         background: #000;
         padding: 3px;
         position: fixed;
         bottom: 0;
         width: 100%;
       }
-      form input {
+      .form .input {
         border: 0;
         padding: 10px;
         width: 90%;
         margin-right: 0.5%;
       }
-      form button {
+      .form .button {
         width: 9%;
         background: rgb(130, 224, 255);
         border: none;
@@ -49,29 +49,54 @@
   <script>
     $(function() {
       var socket = io();
-      $("input").keyup(function(e) {
+
+      $("#test").click(e => {
+        socket.emit("test");
+      });
+      $("#m").keyup(function(e) {
         // if (!e.val()) {
-        console.log("change works client");
+
         socket.emit("typing", $("#m").val());
         // }
         return false;
       });
-      $("form").submit(function(e) {
+      $("#messageForm").submit(function(e) {
         e.preventDefault(); // prevents page reloading
         socket.emit("chat message", $("#m").val());
         $("#m").val("");
         return false;
       });
+      $("#loginForm").submit(e => {
+        e.preventDefault();
+        if ($("#login").val()) {
+          socket.emit("login", $("#login").val());
+          $("#user").text($("#login").val());
+          $("#login").val("");
+        }
+      });
       socket.on("sent message", data => {
-        console.log("hello");
         $("#messages").append(`<li>${data}</li>`);
+      });
+      socket.on("disconnected", msg => {
+        $("#messages").append(`<li>${msg} has disconnected</li>`);
+      });
+      socket.on("userLoggedIn", user => {
+        $("#messages").append(`<li>${user} has connected</li>`);
       });
     });
   </script>
   <body>
+    <p id="user"></p>
+    <button id="test">press me</button>
     <ul id="messages"></ul>
-    <form action="">
-      <input id="m" autocomplete="off" /><button>Send</button>
+    <form id="loginForm" action="">
+      <input id="login" type="text" />
+      <button>login</button>
+    </form>
+    <form id="messageForm" class="form" action="">
+      <input class="input" id="m" autocomplete="off" /><button class="button">
+        Send
+      </button>
     </form>
   </body>
 </html>

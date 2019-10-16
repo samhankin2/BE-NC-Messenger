@@ -6,17 +6,52 @@ app.get("/", function(req, res) {
   res.sendFile(__dirname + "/index.html");
 });
 
+let loggedInUsers = [];
+
 io.on("connection", function(socket) {
-  console.log("connected");
+  let added = false;
+  let currentUser = "";
+  console.log("Connected");
   socket.on("chat message", function(msg) {
-    console.log("message: " + msg);
     io.sockets.emit("sent message", msg);
   });
-  socket.on("typing", data => {
-    console.log(data);
+
+  socket.on("login", user => {
+    added = true;
+    currentUser = user;
+    loggedInUsers.push(user);
+    io.sockets.emit("userLoggedIn", currentUser);
+    console.log(user + " logged in");
+  });
+
+  socket.on("test", () => {
+    // console.log(added);
+    console.log(currentUser);
+    console.log(loggedInUsers);
+  });
+
+  socket.on("disconnect", reason => {
+    console.log("disconnected");
+    if (added) {
+      io.sockets.emit("disconnected", currentUser);
+      loggedInUsers = loggedInUsers.filter(user => {
+        console.log(user);
+        console.log(currentUser);
+        return user !== currentUser;
+      });
+    }
   });
 });
 
 http.listen(3000, function() {
   console.log("listening on *:3000");
 });
+
+// socket.on("typing", data => {
+//   console.log(data);
+// });
+
+// To Do
+//doesnt show logged out if not logged in
+//display someone logging in
+//make sure filter works properly and logged out properly
