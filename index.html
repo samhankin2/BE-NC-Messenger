@@ -69,23 +69,33 @@
       $("#loginForm").submit(e => {
         e.preventDefault();
         if ($("#login").val()) {
-          socket.emit("login", $("#login").val());
+          console.log($("#login").val());
+          socket.emit("login", {
+            username: $("#login").val(),
+            img_url:
+              "https://cloudfour.com/examples/img-currentsrc/images/kitten-small.png"
+          });
           $("#user").text($("#login").val());
           $("#login").val("");
         }
       });
       socket.on("sent message", ({ currentUser, msg }) => {
-        $("#typing" + currentUser).remove();
+        $("#typing" + currentUser.username).remove();
         $("#messages").append(`<li>${msg}</li>`);
       });
-      socket.on("disconnected", msg => {
-        $("#messages").append(`<li>${msg} has disconnected</li>`);
+      socket.on("disconnected", currentUser => {
+        $("#messages").append(
+          `<li>${currentUser.username} has disconnected</li>`
+        );
       });
       socket.on("userLoggedIn", user => {
-        $("#messages").append(`<li>${user} has connected</li>`);
+        $("#messages").append(`<li>${user.username} has connected</li>`);
       });
       socket.on("typing", user => {
-        $("#messages").append(`<li id="typing${user}">${user} is typing</li>`);
+        console.log(user);
+        $("#messages").append(
+          `<li id="typing${user.username}">${user.username} is typing</li>`
+        );
       });
     });
   </script>

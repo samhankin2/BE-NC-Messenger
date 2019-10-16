@@ -10,24 +10,25 @@ let loggedInUsers = [];
 
 io.on("connection", function(socket) {
   let added = false;
-  let currentUser = "";
+  let currentUser = { username: "", img_url: "" };
   let typing = false;
   console.log("Connected");
+
   socket.on("chat message", function(msg) {
     io.sockets.emit("sent message", { msg, currentUser });
     typing = false;
   });
 
-  socket.on("login", user => {
+  socket.on("login", ({ username, img_url }) => {
     added = true;
-    currentUser = user;
-    loggedInUsers.push(user);
-    io.sockets.emit("userLoggedIn", currentUser);
-    console.log(user + " logged in");
-  });
+    console.log(username);
+    currentUser.username = username;
+    currentUser.img_url = img_url;
+    loggedInUsers.push(username);
 
-  //git remote add origin https://github.com/samhankin2/BE-NC-Messenger.git
-  // git push -u origin master
+    io.sockets.emit("userLoggedIn", currentUser);
+    console.log(currentUser + " logged in");
+  });
 
   socket.on("test", () => {
     // console.log(added);
@@ -52,13 +53,17 @@ io.on("connection", function(socket) {
       loggedInUsers = loggedInUsers.filter(user => {
         console.log(user);
         console.log(currentUser);
-        return user !== currentUser;
+        return user !== currentUser.username;
       });
     }
   });
+
+  socket.on("onlineUsers", () => {
+    io.sockets.emit("onlineUsers", loggedInUsers);
+  });
 });
 
-http.listen(3000, function() {
+http.listen(3002, function() {
   console.log("listening on *:3000");
 });
 
@@ -66,3 +71,4 @@ http.listen(3000, function() {
 
 //make sure filter works properly and logged out properly
 //changiing names should remove old name
+//send back timestamp
