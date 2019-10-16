@@ -51,7 +51,7 @@
       var socket = io();
 
       $("#test").click(e => {
-        socket.emit("test");
+        socket.emit("onlineUsers");
       });
       $("#m").keyup(function(e) {
         // if (!e.target.value) {
@@ -96,6 +96,10 @@
         $("#messages").append(
           `<li id="typing${user.username}">${user.username} is typing</li>`
         );
+      });
+
+      socket.on("onlineUsers", data => {
+        console.log(data);
       });
     });
   </script>

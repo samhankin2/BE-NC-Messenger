@@ -24,10 +24,20 @@ io.on("connection", function(socket) {
     console.log(username);
     currentUser.username = username;
     currentUser.img_url = img_url;
-    loggedInUsers.push(username);
+    loggedInUsers.push(currentUser);
 
     io.sockets.emit("userLoggedIn", currentUser);
     console.log(currentUser + " logged in");
+  });
+
+  socket.on("changeProfile", ({ username, img_url }) => {
+    loggedInUsers = loggedInUsers.filter(user => {
+      return user.username !== currentUser.username;
+    });
+    if (username) currentUser.username = username;
+    if (img_url) currentUser.img_url = img_url;
+
+    loggedInUsers.push(currentUser);
   });
 
   socket.on("test", () => {
@@ -63,12 +73,10 @@ io.on("connection", function(socket) {
   });
 });
 
-http.listen(3002, function() {
+http.listen(3003, function() {
   console.log("listening on *:3000");
 });
 
 // To Do
 
-//make sure filter works properly and logged out properly
-//changiing names should remove old name
 //send back timestamp
