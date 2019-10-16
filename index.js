@@ -26,6 +26,9 @@ io.on("connection", function(socket) {
     console.log(user + " logged in");
   });
 
+  //git remote add origin https://github.com/samhankin2/BE-NC-Messenger.git
+  // git push -u origin master
+
   socket.on("test", () => {
     // console.log(added);
     console.log(currentUser);
